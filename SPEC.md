@@ -123,11 +123,11 @@ Frontend examples (fetch is mocked; the error-text rules are D6/D7):
 - Repo-wide ruff cleanup. Only touched files are linted.
 
 ## Tasks
-- [ ] T1: API test harness (`tests/conftest.py` client fixture + seed of A/B/C) and failing tests for E1–E7 — verify: `uv run pytest -q tests/test_api_claims.py`
-- [ ] T2: Status route delegates to `ClaimService.transition_status`; 400/404 mapping (R1–R4) — verify: `uv run pytest -q`
-- [ ] T3: Unknown code → validation error, all errors in input order (R5, R6; E8–E12) — verify: `uv run pytest -q`
-- [ ] T4: List reflects writes (R7; E13) — verify: `uv run pytest -q`
-- [ ] T5: Frontend test tooling (D9) + `errorMessage` helper with unit tests (D6) — verify: `pnpm --ignore-workspace test`
+- [x] T1: API test harness (`tests/conftest.py` client fixture + seed of A/B/C) and failing tests for E1–E7 — verify: `uv run pytest -q tests/test_api_claims.py`
+- [x] T2: Status route delegates to `ClaimService.transition_status`; 400/404 mapping (R1–R4) — verify: `uv run pytest -q`
+- [x] T3: Unknown code → validation error, all errors in input order (R5, R6; E8–E12) — verify: `uv run pytest -q`
+- [x] T4: List reflects writes (R7; E13) — already held; regression test added — verify: `uv run pytest -q`
+- [x] T5: Frontend test tooling (D9) + `errorMessage` helper with unit tests (D6) — verify: `pnpm --ignore-workspace test`
 - [ ] T6: `ClaimList` loading/error/retry/empty states (R8–R10; F1–F5) — verify: `pnpm --ignore-workspace test && pnpm --ignore-workspace exec tsc`
 - [ ] T7: `SubmitClaim` server errors + navigate on success (R11, R12; F6–F9) — verify: same
 - [ ] T8: `ClaimDetail` PATCH handling + load errors (R13–R15; F10–F12) — verify: same
