@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { Claim, ClaimsListResponse } from "../types/api";
 
 const PRACTICE_ID = "practice-1";
@@ -11,8 +11,11 @@ type ListState =
 
 export function ClaimList() {
   const [state, setState] = useState<ListState>({ kind: "loading" });
-  // Message passed via router state, e.g. after a successful submit.
-  const flash = (useLocation().state as { flash?: string } | null)?.flash;
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Message passed via router state, e.g. after a successful submit. Kept in component
+  // state and cleared from history so a reload or Back doesn't show it again.
+  const [flash] = useState(() => (location.state as { flash?: string } | null)?.flash);
 
   const loadClaims = useCallback(async () => {
     setState({ kind: "loading" });
@@ -27,13 +30,27 @@ export function ClaimList() {
       setState({ kind: "error", message: `Couldn't load claims (HTTP ${res.status}).` });
       return;
     }
-    const data: ClaimsListResponse = await res.json();
+    let data: ClaimsListResponse;
+    try {
+      data = await res.json();
+    } catch {
+      data = {} as ClaimsListResponse;
+    }
+    if (!Array.isArray(data?.claims)) {
+      setState({ kind: "error", message: "Couldn't load claims (invalid response)." });
+      return;
+    }
     setState({ kind: "loaded", claims: data.claims });
   }, []);
 
   useEffect(() => {
     loadClaims();
   }, [loadClaims]);
+
+  useEffect(() => {
+    if (flash) navigate(location.pathname, { replace: true, state: null });
+    // Run once on mount.
+  }, []);
 
   return (
     <div className="page">

@@ -17,6 +17,7 @@ export function ClaimDetail() {
   const [claim, setClaim] = useState<Claim | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -38,23 +39,29 @@ export function ClaimDetail() {
   }, [id]);
 
   const handleStatusUpdate = async (newStatus: ClaimStatus) => {
+    if (isUpdating) return;
     setActionError(null);
-    let res: Response;
+    setIsUpdating(true);
     try {
-      res = await fetch(`/api/claims/${id}/status?practice_id=${PRACTICE_ID}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-    } catch {
-      setActionError("Couldn't update status (network error).");
-      return;
+      let res: Response;
+      try {
+        res = await fetch(`/api/claims/${id}/status?practice_id=${PRACTICE_ID}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+      } catch {
+        setActionError("Couldn't update status (network error).");
+        return;
+      }
+      if (!res.ok) {
+        setActionError(await errorMessage(res));
+        return;
+      }
+      setClaim(await res.json());
+    } finally {
+      setIsUpdating(false);
     }
-    if (!res.ok) {
-      setActionError(await errorMessage(res));
-      return;
-    }
-    setClaim(await res.json());
   };
 
   if (loadError) {
@@ -106,16 +113,16 @@ export function ClaimDetail() {
 
       <div className="actions">
         {claim.status === "pending" && (
-          <button type="button" onClick={() => handleStatusUpdate(ClaimStatus.REJECTED)}>
+          <button type="button" disabled={isUpdating} onClick={() => handleStatusUpdate(ClaimStatus.REJECTED)}>
             Reject Claim
           </button>
         )}
         {claim.status === "validated" && (
           <>
-            <button type="button" onClick={() => handleStatusUpdate(ClaimStatus.ACCEPTED)}>
+            <button type="button" disabled={isUpdating} onClick={() => handleStatusUpdate(ClaimStatus.ACCEPTED)}>
               Accept
             </button>
-            <button type="button" onClick={() => handleStatusUpdate(ClaimStatus.REJECTED)}>
+            <button type="button" disabled={isUpdating} onClick={() => handleStatusUpdate(ClaimStatus.REJECTED)}>
               Reject
             </button>
           </>
