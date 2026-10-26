@@ -85,18 +85,10 @@ async def update_claim_status(
     if not claim:
         raise HTTPException(status_code=404, detail="Not found")
 
-    # Valid transitions from each state
-    valid_transitions = {
-        ClaimStatus.PENDING: [ClaimStatus.VALIDATED],
-        ClaimStatus.VALIDATED: [ClaimStatus.ACCEPTED, ClaimStatus.REJECTED],
-        ClaimStatus.REJECTED: [],
-        ClaimStatus.ACCEPTED: [],
-    }
-    if data.status not in valid_transitions.get(claim.status, []):
-        raise HTTPException(status_code=400, detail="Invalid status transition")
-
-    claim.status = data.status
-    await service.session.commit()
+    try:
+        claim = await service.transition_status(claim, data.status)
+    except InvalidStatusTransitionError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     return claim.to_dict()
 
 
