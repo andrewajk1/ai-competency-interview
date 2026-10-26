@@ -16,8 +16,10 @@ class ValidationService:
     def validate_claim(self, procedures: list[dict]) -> list[str]:
         errors = []
         for proc in procedures:
-            code_info = self.validate_procedure_code(proc["code"])
-            if proc["amount"] > code_info["max_amount"]:
+            code_info = self._codes.get(proc["code"])
+            if code_info is None:
+                errors.append(f"Procedure {proc['code']}: unknown procedure code")
+            elif proc["amount"] > code_info["max_amount"]:
                 errors.append(
                     f"Procedure {proc['code']}: amount ${proc['amount']:.2f} "
                     f"exceeds maximum ${code_info['max_amount']:.2f}"
