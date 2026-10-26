@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.db import get_session
-from src.common.exceptions import ClaimValidationError, InvalidStatusTransitionError
+from src.common.exceptions import InvalidStatusTransitionError
 from src.models.claim import ClaimStatus
 from src.services.claim_service import ClaimService
 from src.services.validation_service import ValidationService
