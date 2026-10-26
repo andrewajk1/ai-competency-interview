@@ -5,7 +5,6 @@ import httpx
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
-
 from src.app import app
 from src.common.db import get_session
 from src.models.base import Base
@@ -102,7 +101,9 @@ async def seeded(api_db: async_sessionmaker[AsyncSession]) -> SeededClaims:
 
 
 @pytest.fixture
-async def client(api_db: async_sessionmaker[AsyncSession]) -> AsyncGenerator[httpx.AsyncClient]:
+async def client(
+    api_db: async_sessionmaker[AsyncSession],
+) -> AsyncGenerator[httpx.AsyncClient]:
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
