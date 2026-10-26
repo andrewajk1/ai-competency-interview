@@ -128,7 +128,7 @@ Frontend examples (fetch is mocked; the error-text rules are D6/D7):
 - [x] T3: Unknown code → validation error, all errors in input order (R5, R6; E8–E12) — verify: `uv run pytest -q`
 - [x] T4: List reflects writes (R7; E13) — already held; regression test added — verify: `uv run pytest -q`
 - [x] T5: Frontend test tooling (D9) + `errorMessage` helper with unit tests (D6) — verify: `pnpm --ignore-workspace test`
-- [ ] T6: `ClaimList` loading/error/retry/empty states (R8–R10; F1–F5) — verify: `pnpm --ignore-workspace test && pnpm --ignore-workspace exec tsc`
+- [x] T6: `ClaimList` loading/error/retry/empty states (R8–R10; F1–F5) — verify: `pnpm --ignore-workspace test && pnpm --ignore-workspace exec tsc`
 - [ ] T7: `SubmitClaim` server errors + navigate on success (R11, R12; F6–F9) — verify: same
 - [ ] T8: `ClaimDetail` PATCH handling + load errors (R13–R15; F10–F12) — verify: same
 - [ ] T9: Full run: `uv run pytest -q`, `uv run ruff check <touched>`, frontend tests + tsc, manual smoke test through the browser or curl via :5173
