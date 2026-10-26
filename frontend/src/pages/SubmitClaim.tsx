@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { errorMessage } from "../api/errors";
 
 interface ProcedureInput {
   code: string;
@@ -6,6 +8,7 @@ interface ProcedureInput {
 }
 
 export function SubmitClaim() {
+  const navigate = useNavigate();
   const [patientName, setPatientName] = useState("");
   const [payerId, setPayerId] = useState("");
   const [procedures, setProcedures] = useState<ProcedureInput[]>([
@@ -13,12 +16,10 @@ export function SubmitClaim() {
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccessMessage(null);
     setIsSubmitting(true);
 
     try {
@@ -41,17 +42,14 @@ export function SubmitClaim() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail?.message ?? "Failed to submit claim");
+        setError(await errorMessage(response));
+        setIsSubmitting(false);
+        return;
       }
 
-      setSuccessMessage("Claim submitted successfully");
-      setPatientName("");
-      setPayerId("");
-      setProcedures([{ code: "", amount: "" }]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
+      navigate("/", { state: { flash: "Claim submitted successfully" } });
+    } catch {
+      setError("Couldn't submit claim (network error).");
       setIsSubmitting(false);
     }
   };
@@ -71,20 +69,25 @@ export function SubmitClaim() {
   return (
     <div className="page">
       <h1>Submit Claim</h1>
-      {error && <div className="error-banner">{error}</div>}
-      {successMessage && <div className="success-banner">{successMessage}</div>}
+      {error && (
+        <div className="error-banner" role="alert" style={{ whiteSpace: "pre-line" }}>
+          {error}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <div className="field">
-          <label>Patient Name</label>
+          <label htmlFor="patient-name">Patient Name</label>
           <input
+            id="patient-name"
             value={patientName}
             onChange={(e) => setPatientName(e.target.value)}
             required
           />
         </div>
         <div className="field">
-          <label>Payer ID</label>
+          <label htmlFor="payer-id">Payer ID</label>
           <input
+            id="payer-id"
             value={payerId}
             onChange={(e) => setPayerId(e.target.value)}
             required

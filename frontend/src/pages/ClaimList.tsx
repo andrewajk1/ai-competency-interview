@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { Claim, ClaimsListResponse } from "../types/api";
 
 const PRACTICE_ID = "practice-1";
@@ -11,6 +11,8 @@ type ListState =
 
 export function ClaimList() {
   const [state, setState] = useState<ListState>({ kind: "loading" });
+  // Message passed via router state, e.g. after a successful submit.
+  const flash = (useLocation().state as { flash?: string } | null)?.flash;
 
   const loadClaims = useCallback(async () => {
     setState({ kind: "loading" });
@@ -41,6 +43,11 @@ export function ClaimList() {
           <button type="button">Submit New Claim</button>
         </Link>
       </div>
+      {flash && (
+        <div className="success-banner" role="status">
+          {flash}
+        </div>
+      )}
       {state.kind === "error" && (
         <div className="error-banner" role="alert">
           {state.message}{" "}
