@@ -132,3 +132,27 @@ Frontend examples (fetch is mocked; the error-text rules are D6/D7):
 - [x] T7: `SubmitClaim` server errors + navigate on success (R11, R12; F6–F9) — verify: same
 - [x] T8: `ClaimDetail` PATCH handling + load errors (R13–R15; F10–F12) — verify: same
 - [ ] T9: Full run: `uv run pytest -q`, `uv run ruff check <touched>`, frontend tests + tsc, manual smoke test through the browser or curl via :5173
+
+## Amendment 1 (from the independent spec review; additive)
+Only new requirements; no existing example or decision changes. New tests live in `frontend/src/pages/amendment1.test.tsx`.
+
+| # | Input | Expected |
+|---|---|---|
+| F13 (error) | List GET → 200 with a non-JSON body (`<html>`) | Banner "Couldn't load claims (invalid response)." + Retry; no endless "Loading" |
+| F14 (error) | List GET → 200 `{"items":[]}` (no `claims` array) | Same banner as F13; the page does not go blank |
+| F15 | Detail: click "Reject Claim" twice before the PATCH resolves | Exactly **one** PATCH is sent; the buttons are disabled while it is in flight |
+| F16 | List opened with router state `{flash: "X"}` | Banner "X" is shown, and the history entry's state is cleared, so a reload or Back doesn't show it again |
+| F17 (error) | Submit → fetch rejects | Error banner "Couldn't submit claim (network error)." |
+| F18 (error) | Detail: PATCH fetch rejects | Error banner "Couldn't update status (network error)."; the status badge is unchanged |
+
+- **R16**: IF the list responds 2xx with a body that isn't JSON or has no `claims` array, THEN THE SYSTEM SHALL show "Couldn't load claims (invalid response)." with Retry. (F13, F14)
+- **R17**: WHILE a status update is in flight, THE SYSTEM SHALL disable the status action buttons. (F15)
+- **R18**: THE SYSTEM SHALL show a router-state flash message once and then clear it from the history entry. (F16)
+- **R19**: IF a submit or a status update can't reach the server, THEN THE SYSTEM SHALL show a network-error banner (D12). (F17, F18)
+
+| # | Question | Decision | Status |
+|---|---|---|---|
+| D12 | Network-error copy | Submit: "Couldn't submit claim (network error)." Status update: "Couldn't update status (network error)." Detail load: "Couldn't load claim (network error)." | ASSUMED |
+| D13 | Malformed 2xx PATCH body, and stale detail responses when `:id` changes (review findings 4 and 6) | **Not handled.** The backend always returns JSON from `to_dict()`, and the app has no navigation from one claim to another. | ASSUMED |
+
+- [x] T10: R16–R19 (F13–F18) — verify: `pnpm --ignore-workspace test && pnpm --ignore-workspace exec tsc`
